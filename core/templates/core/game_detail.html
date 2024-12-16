@@ -1,0 +1,338 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho do Jogo -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="game-header-detail">
+                        <!-- Time da Casa -->
+                        <div class="team-detail">
+                            <div class="team-logo-wrapper-lg">
+                                <img src="https://cdn.nba.com/logos/nba/{{ game.home_team.team_id }}/global/L/logo.svg" 
+                                     alt="{{ game.home_team.name }}"
+                                     class="team-logo">
+                            </div>
+                            <h2 class="h4 mb-0">{{ game.home_team.name }}</h2>
+                            {% if game.status != 'Scheduled' %}
+                                <div class="score">{{ game.home_team_score }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Info do Jogo -->
+                        <div class="game-info">
+                            <div class="game-time">{{ game.date|date:"d/m/Y H:i" }}</div>
+                            <div class="game-status">
+                                {% if game.status == 'Final' %}
+                                    <span class="badge bg-danger">Encerrado</span>
+                                {% elif game.status == 'In Progress' %}
+                                    <span class="badge bg-success">Ao Vivo</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Em Breve</span>
+                                {% endif %}
+                            </div>
+                            {% if game.status == 'Scheduled' %}
+                                <div class="vs-text">VS</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Time Visitante -->
+                        <div class="team-detail">
+                            <div class="team-logo-wrapper-lg">
+                                <img src="https://cdn.nba.com/logos/nba/{{ game.away_team.team_id }}/global/L/logo.svg" 
+                                     alt="{{ game.away_team.name }}"
+                                     class="team-logo">
+                            </div>
+                            <h2 class="h4 mb-0">{{ game.away_team.name }}</h2>
+                            {% if game.status != 'Scheduled' %}
+                                <div class="score">{{ game.away_team_score }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jogadores e Estatísticas -->
+    <div class="row g-4">
+        <!-- Time da Casa -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">{{ game.home_team.name }} - Jogadores</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for player in home_players %}
+                        <a href="{% url 'player_detail' player.player_id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="player-photo-wrapper">
+                                    <img src="https://cdn.nba.com/headshots/nba/latest/260x190/{{ player.player_id }}.png" 
+                                         alt="{{ player.first_name }}"
+                                         class="player-photo"
+                                         onerror="this.src='https://cdn.nba.com/headshots/nba/latest/260x190/logoman.png';">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">{{ player.first_name }} {{ player.last_name }}</h6>
+                                            <div class="small text-secondary">{{ player.position }}</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge bg-primary">{{ player.avg_points|floatformat:1 }} PPG</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 small">
+                                        <div class="row g-2">
+                                            <div class="col-auto">
+                                                <span class="text-secondary">AST:</span>
+                                                <span>{{ player.avg_assists|floatformat:1 }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="text-secondary">REB:</span>
+                                                <span>{{ player.avg_rebounds|floatformat:1 }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="text-secondary">MIN:</span>
+                                                <span>{{ player.avg_minutes|floatformat:1 }}</span>
+                                            </div>
+                                        </div>
+                                        {% if player.strength %}
+                                            <div class="mt-1">
+                                                <span class="badge bg-success">{{ player.strength }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if home_stats %}
+                                {% for stat in home_stats %}
+                                    {% if stat.player == player %}
+                                        <div class="game-stats mt-2">
+                                            <div class="row g-2">
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">PTS:</span>
+                                                    <span class="fw-bold">{{ stat.points }}</span>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">REB:</span>
+                                                    <span>{{ stat.rebounds }}</span>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">AST:</span>
+                                                    <span>{{ stat.assists }}</span>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">MIN:</span>
+                                                    <span>{{ stat.minutes }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Time Visitante -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">{{ game.away_team.name }} - Jogadores</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for player in away_players %}
+                        <a href="{% url 'player_detail' player.player_id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="player-photo-wrapper">
+                                    <img src="https://cdn.nba.com/headshots/nba/latest/260x190/{{ player.player_id }}.png" 
+                                         alt="{{ player.first_name }}"
+                                         class="player-photo"
+                                         onerror="this.src='https://cdn.nba.com/headshots/nba/latest/260x190/logoman.png';">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">{{ player.first_name }} {{ player.last_name }}</h6>
+                                            <div class="small text-secondary">{{ player.position }}</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge bg-primary">{{ player.avg_points|floatformat:1 }} PPG</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 small">
+                                        <div class="row g-2">
+                                            <div class="col-auto">
+                                                <span class="text-secondary">AST:</span>
+                                                <span>{{ player.avg_assists|floatformat:1 }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="text-secondary">REB:</span>
+                                                <span>{{ player.avg_rebounds|floatformat:1 }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="text-secondary">MIN:</span>
+                                                <span>{{ player.avg_minutes|floatformat:1 }}</span>
+                                            </div>
+                                        </div>
+                                        {% if player.strength %}
+                                            <div class="mt-1">
+                                                <span class="badge bg-success">{{ player.strength }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if away_stats %}
+                                {% for stat in away_stats %}
+                                    {% if stat.player == player %}
+                                        <div class="game-stats mt-2">
+                                            <div class="row g-2">
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">PTS:</span>
+                                                    <span class="fw-bold">{{ stat.points }}</span>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">REB:</span>
+                                                    <span>{{ stat.rebounds }}</span>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">AST:</span>
+                                                    <span>{{ stat.assists }}</span>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-secondary">MIN:</span>
+                                                    <span>{{ stat.minutes }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .game-header-detail {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    
+    .team-detail {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .team-logo-wrapper-lg {
+        width: 100px;
+        height: 100px;
+        flex-shrink: 0;
+    }
+    
+    .team-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    .game-info {
+        text-align: center;
+    }
+    
+    .game-time {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .vs-text {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 1rem 0;
+        color: var(--primary);
+    }
+    
+    .score {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .player-photo-wrapper {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 50%;
+        background-color: var(--bg-lighter);
+    }
+    
+    .player-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .list-group-item {
+        background-color: transparent;
+        border-color: var(--border-color);
+        transition: background-color 0.2s;
+    }
+    
+    .list-group-item-action:hover {
+        background-color: var(--bg-darker);
+    }
+    
+    .game-stats {
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    @media (max-width: 768px) {
+        .game-header-detail {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .team-logo-wrapper-lg {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .score {
+            font-size: 2rem;
+        }
+        
+        .vs-text {
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .player-photo-wrapper {
+            width: 36px;
+            height: 36px;
+        }
+    }
+</style>
+{% endblock %} 

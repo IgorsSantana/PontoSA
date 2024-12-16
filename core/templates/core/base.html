@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="d-flex flex-column flex-lg-row min-vh-100">
+    <!-- Sidebar (Desktop) -->
+    <aside class="sidebar d-none d-lg-flex flex-column border-end">
+        <div class="d-flex align-items-center gap-2 p-3 border-bottom">
+            <i class="bi bi-dribbble text-primary h3 mb-0"></i>
+            <h1 class="h5 mb-0">NBA Stats</h1>
+        </div>
+        <div class="flex-grow-1 p-3">
+            <div class="d-flex flex-column gap-2">
+                <a href="{% url 'index' %}" class="sidebar-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Início</span>
+                </a>
+                <a href="{% url 'games' %}" class="sidebar-link {% if request.resolver_match.url_name == 'games' %}active{% endif %}">
+                    <i class="bi bi-controller"></i>
+                    <span>Jogos</span>
+                </a>
+                <a href="{% url 'players' %}" class="sidebar-link {% if request.resolver_match.url_name == 'players' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Jogadores</span>
+                </a>
+                <a href="{% url 'bet_suggestions' %}" class="sidebar-link {% if request.resolver_match.url_name == 'bet_suggestions' %}active{% endif %}">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Apostas</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow-1 py-4 main-content">
+        <div class="container-fluid px-lg-4">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Navbar Inferior (Mobile) -->
+    <nav class="navbar fixed-bottom navbar-dark bg-dark border-top d-lg-none">
+        <div class="container-fluid px-0">
+            <div class="row w-100 gx-0 text-center">
+                <div class="col">
+                    <a href="{% url 'index' %}" class="nav-link py-3 position-relative {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <i class="bi bi-house-fill d-block h4 mb-0"></i>
+                        <small class="nav-label">Início</small>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{% url 'games' %}" class="nav-link py-3 position-relative {% if request.resolver_match.url_name == 'games' %}active{% endif %}">
+                        <i class="bi bi-controller d-block h4 mb-0"></i>
+                        <small class="nav-label">Jogos</small>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{% url 'players' %}" class="nav-link py-3 position-relative {% if request.resolver_match.url_name == 'players' %}active{% endif %}">
+                        <i class="bi bi-people-fill d-block h4 mb-0"></i>
+                        <small class="nav-label">Jogadores</small>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{% url 'bet_suggestions' %}" class="nav-link py-3 position-relative {% if request.resolver_match.url_name == 'bet_suggestions' %}active{% endif %}">
+                        <i class="bi bi-graph-up-arrow d-block h4 mb-0"></i>
+                        <small class="nav-label">Apostas</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <style>
+        :root {
+            --bg-color: #121212;
+            --bg-lighter: #1e1e1e;
+            --bg-darker: #0a0a0a;
+            --text-color: #e0e0e0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary: #0d6efd;
+            --sidebar-width: 240px;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-lighter);
+            border-color: var(--border-color);
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+        
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: var(--primary);
+            opacity: 1;
+        }
+        
+        .sidebar-link i {
+            font-size: 1.25rem;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: var(--bg-lighter);
+            border-color: var(--border-color);
+        }
+        
+        /* Mobile Navbar Styles */
+        .navbar {
+            background-color: var(--bg-lighter) !important;
+            border-color: var(--border-color);
+            padding: 0;
+            height: 85px;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-color);
+            opacity: 1;
+        }
+        
+        .nav-link i {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .nav-label {
+            font-size: 0.75rem;
+            display: block;
+            margin-top: -0.25rem;
+        }
+        
+        /* Desktop Styles */
+        @media (min-width: 992px) {
+            .main-content {
+                max-width: calc(100vw - var(--sidebar-width));
+            }
+            
+            body {
+                overflow: hidden;
+            }
+            
+            main {
+                height: 100vh;
+                overflow-y: auto;
+            }
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 991.98px) {
+            body {
+                padding-bottom: 85px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            body {
+                padding-bottom: 75px;
+            }
+            
+            .navbar {
+                height: 75px;
+            }
+            
+            .nav-link {
+                padding: 0.5rem 0;
+            }
+            
+            .nav-link i {
+                font-size: 1.25rem;
+            }
+            
+            .nav-label {
+                font-size: 0.7rem;
+            }
+        }
+        
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-darker);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

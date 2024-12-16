@@ -1,0 +1,600 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho do Jogador -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+                        <div class="player-photo-wrapper-lg mb-3 mb-md-0">
+                            <img src="https://cdn.nba.com/headshots/nba/latest/1040x760/{{ player.player_id }}.png" 
+                                 alt="{{ player.first_name }}"
+                                 class="player-photo"
+                                 onerror="this.src='https://cdn.nba.com/headshots/nba/latest/1040x760/logoman.png';">
+                        </div>
+                        <div class="flex-grow-1 text-center text-md-start">
+                            <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-3">
+                                <h1 class="h3 mb-0">{{ player.first_name }} {{ player.last_name }}</h1>
+                                <div class="team-logo-wrapper">
+                                    <img src="https://cdn.nba.com/logos/nba/{{ player.team.team_id }}/global/L/logo.svg" 
+                                         alt="{{ player.team.name }}"
+                                         class="team-logo">
+                                </div>
+                            </div>
+                            <div class="text-secondary mb-3">{{ player.position }} | {{ player.team.name }}</div>
+                            {% if strength %}
+                                <div class="mb-3">
+                                    <span class="badge bg-success">{{ strength }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Stats Grid -->
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="small text-secondary">PPG</div>
+                                    <div class="h5 mb-0">{{ season_stats.avg_points|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">RPG</div>
+                                    <div class="h5 mb-0">{{ season_stats.avg_rebounds|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">APG</div>
+                                    <div class="h5 mb-0">{{ season_stats.avg_assists|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">SPG</div>
+                                    <div class="h5 mb-0">{{ season_stats.avg_steals|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">BPG</div>
+                                    <div class="h5 mb-0">{{ season_stats.avg_blocks|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">MPG</div>
+                                    <div class="h5 mb-0">{{ season_stats.avg_minutes|floatformat:1 }}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Shooting Stats -->
+                            <div class="shooting-stats mt-3">
+                                <div class="stat-item">
+                                    <div class="small text-secondary">FG%</div>
+                                    <div class="h5 mb-0">{{ season_stats.field_goal_percentage|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">3P%</div>
+                                    <div class="h5 mb-0">{{ season_stats.three_point_percentage|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">FT%</div>
+                                    <div class="h5 mb-0">{{ season_stats.free_throw_percentage|floatformat:1 }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="small text-secondary">Jogos</div>
+                                    <div class="h5 mb-0">{{ season_stats.games_played }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos de Desempenho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#points" type="button" role="tab">
+                                Pontuação
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#performance" type="button" role="tab">
+                                Desempenho
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#shooting" type="button" role="tab">
+                                Arremessos
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="points">
+                            <div class="chart-container">
+                                <canvas id="pointsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="performance">
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="shooting">
+                            <div class="chart-container">
+                                <canvas id="shootingChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Detalhadas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Últimos Jogos</h5>
+                    <button class="btn btn-sm btn-outline-primary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#statsTable">
+                        Ver Estatísticas
+                    </button>
+                </div>
+                <div class="collapse d-md-block" id="statsTable">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Adversário</th>
+                                    <th class="text-center">MIN</th>
+                                    <th class="text-center">PTS</th>
+                                    <th class="text-center">REB</th>
+                                    <th class="text-center">AST</th>
+                                    <th class="text-center">STL</th>
+                                    <th class="text-center">BLK</th>
+                                    <th class="text-center">FG</th>
+                                    <th class="text-center">3PT</th>
+                                    <th class="text-center">FT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in recent_games %}
+                                <tr>
+                                    <td>{{ game.game.date|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="team-logo-wrapper-sm">
+                                                {% if game.game.home_team == player.team %}
+                                                    <img src="https://cdn.nba.com/logos/nba/{{ game.game.away_team.team_id }}/global/L/logo.svg" 
+                                                         alt="{{ game.game.away_team.name }}"
+                                                         class="team-logo">
+                                                {% else %}
+                                                    <img src="https://cdn.nba.com/logos/nba/{{ game.game.home_team.team_id }}/global/L/logo.svg" 
+                                                         alt="{{ game.game.home_team.name }}"
+                                                         class="team-logo">
+                                                {% endif %}
+                                            </div>
+                                            <span>
+                                                {% if game.game.home_team == player.team %}
+                                                    vs {{ game.game.away_team.name }}
+                                                {% else %}
+                                                    @ {{ game.game.home_team.name }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ game.minutes }}</td>
+                                    <td class="text-center fw-bold">{{ game.points }}</td>
+                                    <td class="text-center">{{ game.rebounds }}</td>
+                                    <td class="text-center">{{ game.assists }}</td>
+                                    <td class="text-center">{{ game.steals }}</td>
+                                    <td class="text-center">{{ game.blocks }}</td>
+                                    <td class="text-center">{{ game.field_goals_made }}/{{ game.field_goals_attempted }}</td>
+                                    <td class="text-center">{{ game.three_pointers_made }}/{{ game.three_pointers_attempted }}</td>
+                                    <td class="text-center">{{ game.free_throws_made }}/{{ game.free_throws_attempted }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .player-photo-wrapper-lg {
+        width: 180px;
+        height: 180px;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 1rem;
+        background-color: var(--bg-lighter);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        position: relative;
+    }
+    
+    .player-photo-wrapper-lg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        transition: transform 0.3s ease;
+    }
+    
+    .player-photo-wrapper-lg:hover img {
+        transform: scale(1.05);
+    }
+    
+    .team-logo-wrapper {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+    
+    .team-logo-wrapper-sm {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+    
+    .team-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .shooting-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        background-color: var(--bg-lighter);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    
+    .nav-tabs {
+        border-bottom: none;
+    }
+    
+    .nav-tabs .nav-link {
+        color: var(--text-color);
+        border: none;
+        padding: 0.5rem 1rem;
+        margin-right: 0.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        background-color: var(--bg-lighter);
+        color: var(--text-color);
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: var(--primary);
+        color: white;
+    }
+    
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    }
+    
+    .table > :not(caption) > * > * {
+        border-bottom-color: var(--border-color);
+        padding: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .player-photo-wrapper-lg {
+            width: 150px;
+            height: 150px;
+        }
+        
+        .team-logo-wrapper {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .team-logo-wrapper-sm {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .stats-grid,
+        .shooting-stats {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .stat-item {
+            padding: 0.25rem;
+        }
+        
+        .chart-container {
+            height: 250px;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stats-grid,
+        .shooting-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .chart-container {
+            height: 200px;
+        }
+    }
+</style>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Configuração do tema escuro para os gráficos
+    Chart.defaults.color = '#adb5bd';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+    
+    // Configurações comuns para os gráficos
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#adb5bd',
+                    usePointStyle: true,
+                    padding: 20
+                },
+                align: 'center'
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                padding: 12,
+                displayColors: true,
+                usePointStyle: true
+            }
+        },
+        scales: {
+            x: {
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                    color: '#adb5bd',
+                    maxRotation: 45,
+                    minRotation: 45
+                }
+            },
+            y: {
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                    color: '#adb5bd'
+                }
+            }
+        }
+    };
+    
+    // Dados para os gráficos
+    const gamesData = {{ games_data|safe }};
+    
+    // Função para formatar datas
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }
+    
+    // Gráfico de distribuição de pontuação
+    const pointsCtx = document.getElementById('pointsChart').getContext('2d');
+    new Chart(pointsCtx, {
+        type: 'bar',
+        data: {
+            labels: gamesData.map(game => formatDate(game.game.date)),
+            datasets: [{
+                label: 'Pontos',
+                data: gamesData.map(game => game.points),
+                backgroundColor: 'rgba(13, 110, 253, 0.5)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                        title: function(context) {
+                            const game = gamesData[context[0].dataIndex].game;
+                            return `${game.home_team} vs ${game.away_team}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Gráfico de evolução de desempenho
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: gamesData.map(game => formatDate(game.game.date)),
+            datasets: [{
+                label: 'Pontos',
+                data: gamesData.map(game => game.points),
+                borderColor: 'rgba(13, 110, 253, 1)',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: 'Rebotes',
+                data: gamesData.map(game => game.rebounds),
+                borderColor: 'rgba(25, 135, 84, 1)',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: 'Assistências',
+                data: gamesData.map(game => game.assists),
+                borderColor: 'rgba(220, 53, 69, 1)',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                        title: function(context) {
+                            const game = gamesData[context[0].dataIndex].game;
+                            return `${game.home_team} vs ${game.away_team}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Gráfico de eficiência de arremessos
+    const shootingCtx = document.getElementById('shootingChart').getContext('2d');
+    new Chart(shootingCtx, {
+        type: 'line',
+        data: {
+            labels: gamesData.map(game => formatDate(game.game.date)),
+            datasets: [{
+                label: 'FG%',
+                data: gamesData.map(game => {
+                    if (game.field_goals_attempted > 0) {
+                        return (game.field_goals_made / game.field_goals_attempted * 100).toFixed(1);
+                    }
+                    return 0;
+                }),
+                borderColor: 'rgba(13, 110, 253, 1)',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: '3P%',
+                data: gamesData.map(game => {
+                    if (game.three_pointers_attempted > 0) {
+                        return (game.three_pointers_made / game.three_pointers_attempted * 100).toFixed(1);
+                    }
+                    return 0;
+                }),
+                borderColor: 'rgba(25, 135, 84, 1)',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: 'FT%',
+                data: gamesData.map(game => {
+                    if (game.free_throws_attempted > 0) {
+                        return (game.free_throws_made / game.free_throws_attempted * 100).toFixed(1);
+                    }
+                    return 0;
+                }),
+                borderColor: 'rgba(220, 53, 69, 1)',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                ...commonOptions.scales,
+                y: {
+                    ...commonOptions.scales.y,
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Porcentagem',
+                        color: '#adb5bd'
+                    }
+                }
+            },
+            plugins: {
+                ...commonOptions.plugins,
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                        title: function(context) {
+                            const game = gamesData[context[0].dataIndex].game;
+                            return `${game.home_team} vs ${game.away_team}`;
+                        },
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Atualiza os gráficos quando as abas são alteradas
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
+        button.addEventListener('shown.bs.tab', function (event) {
+            const chartId = event.target.getAttribute('data-bs-target').substring(1) + 'Chart';
+            const chart = Chart.getChart(chartId);
+            if (chart) {
+                chart.resize();
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

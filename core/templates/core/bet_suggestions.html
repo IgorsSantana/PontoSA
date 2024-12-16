@@ -1,0 +1,132 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h4 text-light mb-0">Sugestões de Apostas</h1>
+                <a href="?generate=true" class="btn btn-sm btn-success">
+                    <i class="fas fa-sync me-2"></i>Gerar Novas Sugestões
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% for date, suggestions_by_game in grouped_suggestions.items %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark border-0">
+                <div class="card-header bg-dark border-bottom border-secondary py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-light">{{ date|date:"H:i d/m/Y" }}</span>
+                    </div>
+                </div>
+
+                {% for game, game_suggestions in suggestions_by_game.items %}
+                <div class="card-body py-2 border-bottom border-secondary">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-light mb-0">{{ game.home_team.name }} - {{ game.away_team.name }}</h6>
+                        {% if game.status == 'Final' %}
+                            <span class="badge bg-danger">Encerrado</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row g-3">
+                        {% for suggestion in game_suggestions %}
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="bg-secondary bg-opacity-25 rounded p-3 h-100">
+                                <div class="d-flex align-items-start gap-2 mb-2">
+                                    <div class="player-photo-wrapper">
+                                        <img src="https://cdn.nba.com/headshots/nba/latest/260x190/{{ suggestion.player.player_id }}.png" 
+                                             alt="{{ suggestion.player.first_name }}"
+                                             class="player-photo rounded"
+                                             onerror="this.src='https://cdn.nba.com/headshots/nba/latest/260x190/logoman.png';">
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="text-light fw-bold">{{ suggestion.player.first_name }} {{ suggestion.player.last_name }}</div>
+                                        <div class="small text-secondary">{{ suggestion.get_market_display }}</div>
+                                        {% if suggestion.result %}
+                                            {% if suggestion.hit %}
+                                                <span class="badge bg-success">Acertou</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Errou</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-center">
+                                        <div class="small text-secondary">Linha</div>
+                                        <div class="h5 mb-0 text-light">{{ suggestion.line }}</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="small text-secondary">Resultado</div>
+                                        <div class="h5 mb-0 text-light">{{ suggestion.result|default:"-" }}</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="small text-secondary">Odds</div>
+                                        <div class="h5 mb-0 text-success">{{ suggestion.odds }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="row">
+        <div class="col-12 text-center py-5">
+            <p class="text-secondary mb-2">Nenhuma sugestão de aposta disponível.</p>
+            <p class="text-secondary small">Clique no botão acima para gerar novas sugestões.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .player-photo-wrapper {
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 50%;
+        background-color: var(--bg-darker);
+    }
+
+    .player-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+    }
+
+    @media (max-width: 576px) {
+        .container-fluid {
+            padding: 0.75rem;
+        }
+        
+        .card-body {
+            padding: 0.75rem;
+        }
+        
+        .player-photo-wrapper {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .h5 {
+            font-size: 1rem;
+        }
+        
+        .small {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,96 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Jogos Recentes -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-basketball-ball"></i> Jogos Recentes</h5>
+            </div>
+            <div class="card-body">
+                {% for game in recent_games %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-4 text-end">
+                                {% if game.home_team.logo_url %}
+                                <img src="{{ game.home_team.logo_url }}" alt="{{ game.home_team }}" class="team-logo mb-2">
+                                {% endif %}
+                                <h6>{{ game.home_team }}</h6>
+                            </div>
+                            <div class="col-4 text-center">
+                                <h5>{{ game.home_score }} x {{ game.away_score }}</h5>
+                                <small class="text-muted">{{ game.date|date:"d/m/Y" }}</small>
+                            </div>
+                            <div class="col-4">
+                                {% if game.away_team.logo_url %}
+                                <img src="{{ game.away_team.logo_url }}" alt="{{ game.away_team }}" class="team-logo mb-2">
+                                {% endif %}
+                                <h6>{{ game.away_team }}</h6>
+                            </div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <a href="{% url 'game_detail' game.game_id %}" class="btn btn-sm btn-outline-primary">
+                                Ver Detalhes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-muted">Nenhum jogo recente encontrado.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="col-md-4">
+        <!-- Top Scorers -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Maiores Pontuadores</h5>
+            </div>
+            <div class="card-body">
+                {% for scorer in top_scorers %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 class="mb-0">{{ scorer.player__first_name }} {{ scorer.player__last_name }}</h6>
+                        <small class="text-muted">{{ scorer.player__team__name }}</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary">{{ scorer.avg_points|floatformat:1 }} PPG</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-muted">Nenhuma estatística disponível.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Assists -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-hands-helping"></i> Líderes em Assistências</h5>
+            </div>
+            <div class="card-body">
+                {% for assist in top_assists %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 class="mb-0">{{ assist.player__first_name }} {{ assist.player__last_name }}</h6>
+                        <small class="text-muted">{{ assist.player__team__name }}</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-info">{{ assist.avg_assists|floatformat:1 }} APG</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-muted">Nenhuma estatística disponível.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
