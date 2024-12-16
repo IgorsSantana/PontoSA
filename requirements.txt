@@ -1,0 +1,5 @@
+Django==5.0.2
+numpy==2.2.0
+requests==2.31.0
+pandas==2.2.0
+nba_api==1.6.1 
